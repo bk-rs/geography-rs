@@ -1,6 +1,6 @@
 #![cfg_attr(not(feature = "std"), no_std)]
 
-extern crate alloc;
+pub extern crate alloc;
 
 //
 #[macro_export]
@@ -9,6 +9,7 @@ macro_rules! continent_code {
         $( #[$meta:meta] )*
         $pub:vis enum $name:ident {
             $(
+                $( #[$variant_meta:meta] )*
                 $variant:ident $( | $alias:ident )*,
             )+
         }
@@ -24,6 +25,7 @@ macro_rules! continent_code {
         impl $name {
             pub const VARS: &'static [$name] = &[
                 $(
+                    $( #[$variant_meta] )*
                     $name::$variant,
                 )+
             ];
@@ -31,14 +33,14 @@ macro_rules! continent_code {
 
         //
         impl ::core::str::FromStr for $name {
-            type Err = ::alloc::boxed::Box::<str>;
+            type Err = $crate::error::ParseError;
 
             fn from_str(s: &str) -> Result<Self, Self::Err> {
                 match s {
                     $(
                         ::core::stringify!($variant) $( | ::core::stringify!($alias) )* => Ok(Self::$variant),
                     )+
-                    s => Err(s.into())
+                    s => Err($crate::error::ParseError::Invalid(s.into()))
                 }
             }
         }
@@ -62,10 +64,28 @@ macro_rules! continent_code {
         }
 
         //
-        impl_partial_eq_str! { str, $name }
-        impl_partial_eq_str! { &'a str, $name }
-        impl_partial_eq_str! { ::alloc::borrow::Cow<'a, str>, $name }
-        impl_partial_eq_str! { ::alloc::string::String, $name }
+        impl ::core::cmp::PartialEq for $name {
+            fn eq(&self, other: &Self) -> bool {
+                $crate::alloc::format!("{}", self) == $crate::alloc::format!("{}", other)
+            }
+        }
+
+        impl ::core::cmp::Eq for $name {
+        }
+
+        //
+        impl_macros::impl_partial_eq_str_for_display! { str, $name }
+        impl_macros::impl_partial_eq_str_for_display! { &'a str, $name }
+        impl_macros::impl_partial_eq_str_for_display! { $crate::alloc::borrow::Cow<'a, str>, $name }
+        impl_macros::impl_partial_eq_str_for_display! { $crate::alloc::string::String, $name }
+
+        //
+        #[cfg(feature = "std")]
+        impl ::std::hash::Hash for $name {
+            fn hash<H: ::std::hash::Hasher>(&self, state: &mut H) {
+                $crate::alloc::format!("{}", self).hash(state);
+            }
+        }
 
         //
         #[cfg(feature = "serde")]
@@ -76,7 +96,7 @@ macro_rules! continent_code {
             {
                 use ::core::str::FromStr as _;
 
-                let s = ::alloc::boxed::Box::<str>::deserialize(deserializer)?;
+                let s = $crate::alloc::boxed::Box::<str>::deserialize(deserializer)?;
                 Self::from_str(&s).map_err(::serde::de::Error::custom)
             }
         }
@@ -88,7 +108,7 @@ macro_rules! continent_code {
             where
                 S: ::serde::Serializer,
             {
-                use ::alloc::string::ToString as _;
+                use $crate::alloc::string::ToString as _;
 
                 self.to_string().serialize(serializer)
             }
@@ -97,21 +117,11 @@ macro_rules! continent_code {
 }
 
 //
-#[macro_export]
-macro_rules! impl_partial_eq_str {
-    ($lhs:ty, $rhs: ty) => {
-        #[allow(unused_lifetimes)]
-        impl<'a> ::core::cmp::PartialEq<$lhs> for $rhs {
-            fn eq(&self, other: &$lhs) -> bool {
-                ::core::cmp::PartialEq::eq(&::alloc::format!("{}", self)[..], &other[..])
-            }
-        }
-    };
-}
+pub mod error;
 
 //
 continent_code! {
-    #[derive(Debug, Clone, PartialEq, Eq, PartialOrd, Ord, Hash)]
+    #[derive(Debug, Clone)]
     pub enum ContinentCode {
         AS,
         AF,
@@ -133,6 +143,7 @@ mod tests {
 
     #[test]
     fn test_continent_code() {
+        // Wikipedia
         let mut rdr = ReaderBuilder::new()
             .has_headers(false)
             .flexible(true)
@@ -159,5 +170,31 @@ mod tests {
         assert_eq!("AU".parse::<ContinentCode>().unwrap().to_string(), "OC");
 
         assert_eq!(ContinentCode::VARS.len(), n);
+
+        // PartialEq
+        assert_eq!(ContinentCode::AS, ContinentCode::AS);
+        assert_eq!(ContinentCode::AS, "AS");
+
+        #[cfg(feature = "serde")]
+        {
+            #[derive(serde::Serialize, serde::Deserialize)]
+            struct Foo {
+                code: ContinentCode,
+            }
+
+            assert_eq!(
+                serde_json::from_str::<Foo>(r#"{"code":"AS"}"#)
+                    .unwrap()
+                    .code,
+                ContinentCode::AS
+            );
+            assert_eq!(
+                serde_json::to_string(&Foo {
+                    code: ContinentCode::AS
+                })
+                .unwrap(),
+                r#"{"code":"AS"}"#
+            );
+        }
     }
 }
