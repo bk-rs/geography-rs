@@ -6,7 +6,7 @@ use crate::iso3166_1::alpha_2::CountryCode;
 country_subdivision_code! {
     CountryCode, CountryCode::CN;
 
-    #[derive(Debug, Clone, PartialEq, Eq, PartialOrd, Ord, Hash)]
+    #[derive(Debug, Clone)]
     pub enum CountrySubdivisionCode {
         AH,
         BJ,

@@ -2,7 +2,8 @@
 
 //
 country_code! {
-    #[derive(Debug, Clone, PartialEq, Eq, PartialOrd, Ord, Hash)]
+    length = 2;
+    #[derive(Debug, Clone)]
     pub enum CountryCode {
         AD,
         AE,

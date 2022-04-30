@@ -9,6 +9,7 @@ macro_rules! country_subdivision_code {
         $( #[$meta:meta] )*
         $pub:vis enum $name:ident {
             $(
+                $( #[$variant_meta:meta] )*
                 $variant:ident,
             )+
         }
@@ -16,9 +17,10 @@ macro_rules! country_subdivision_code {
         $(#[$meta])*
         $pub enum $name {
             $(
+                $( #[$variant_meta] )*
                 $variant,
             )+
-            Other(::alloc::boxed::Box<str>),
+            Other($crate::alloc::boxed::Box<str>),
         }
 
         //
@@ -34,29 +36,30 @@ macro_rules! country_subdivision_code {
 
         //
         impl ::core::str::FromStr for $name {
-            type Err = ::alloc::boxed::Box::<str>;
+            type Err = $crate::error::CountrySubdivisionCodeParseError;
 
             fn from_str(s: &str) -> Result<Self, Self::Err> {
                 let country_code_s = s.chars().take_while(|x| x != &'-' && x != &'_')
-                                                .collect::<::alloc::string::String>();
+                                                .collect::<$crate::alloc::string::String>();
                 let country_code = country_code_s.parse::<$country_code_ty>()
-                                                    .map_err(|_| ::alloc::boxed::Box::<str>::from(alloc::format!("Invalid country_code [{}]", country_code_s)))?;
+                                                    .map_err(|_| $crate::error::CountrySubdivisionCodeParseError::CountryCodeInvalid(country_code_s.as_str().into()))?;
 
                 if country_code != Self::COUNTRY_CODE {
-                    return Err(::alloc::boxed::Box::<str>::from(alloc::format!("Invalid [{}]", s)))
+                    return Err($crate::error::CountrySubdivisionCodeParseError::CountryCodeMismatch(country_code_s.into()));
                 }
 
                 let subdivision_code_s = if s.len() > country_code_s.len() + 1 {
                     &s[country_code_s.len() + 1..]
                 } else {
-                    return Err(::alloc::boxed::Box::<str>::from(alloc::format!("Invalid [{}]", s)))
+                    return Err($crate::error::CountrySubdivisionCodeParseError::SubdivisionCodeMissing);
                 };
 
                 match subdivision_code_s {
                     $(
                         ::core::stringify!($variant) => Ok(Self::$variant),
                     )+
-                    s => Ok(Self::Other(s.into()))
+                    s if s.len() == 2 => Ok(Self::Other(s.into())),
+                    s => Err($crate::error::CountrySubdivisionCodeParseError::SubdivisionCodeInvalid(s.into()))
                 }
             }
         }
@@ -76,15 +79,33 @@ macro_rules! country_subdivision_code {
         //
         impl ::core::default::Default for $name {
             fn default() -> Self {
-                Self::Other("".into())
+                Self::Other(Default::default())
             }
         }
 
         //
-        impl_partial_eq_str! { str, $name }
-        impl_partial_eq_str! { &'a str, $name }
-        impl_partial_eq_str! { ::alloc::borrow::Cow<'a, str>, $name }
-        impl_partial_eq_str! { ::alloc::string::String, $name }
+        impl ::core::cmp::PartialEq for $name {
+            fn eq(&self, other: &Self) -> bool {
+                $crate::alloc::format!("{}", self) == $crate::alloc::format!("{}", other)
+            }
+        }
+
+        impl ::core::cmp::Eq for $name {
+        }
+
+        //
+        impl_macros::impl_partial_eq_str_for_display! { str, $name }
+        impl_macros::impl_partial_eq_str_for_display! { &'a str, $name }
+        impl_macros::impl_partial_eq_str_for_display! { $crate::alloc::borrow::Cow<'a, str>, $name }
+        impl_macros::impl_partial_eq_str_for_display! { $crate::alloc::string::String, $name }
+
+        //
+        #[cfg(feature = "std")]
+        impl ::std::hash::Hash for $name {
+            fn hash<H: ::std::hash::Hasher>(&self, state: &mut H) {
+                $crate::alloc::format!("{}", self).hash(state);
+            }
+        }
 
         //
         #[cfg(feature = "serde")]
@@ -95,7 +116,7 @@ macro_rules! country_subdivision_code {
             {
                 use ::core::str::FromStr as _;
 
-                let s = ::alloc::boxed::Box::<str>::deserialize(deserializer)?;
+                let s = $crate::alloc::boxed::Box::<str>::deserialize(deserializer)?;
                 Self::from_str(&s).map_err(::serde::de::Error::custom)
             }
         }
@@ -107,7 +128,7 @@ macro_rules! country_subdivision_code {
             where
                 S: ::serde::Serializer,
             {
-                use ::alloc::string::ToString as _;
+                use $crate::alloc::string::ToString as _;
 
                 self.to_string().serialize(serializer)
             }
@@ -127,7 +148,8 @@ pub use us::CountrySubdivisionCode as USSubdivisionCode;
 //
 use crate::iso3166_1::alpha_2::CountryCode;
 
-#[derive(Debug, Clone, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[derive(Debug, Clone, PartialEq, Eq)]
+#[cfg_attr(feature = "std", derive(Hash))]
 pub enum SubdivisionCode {
     CN(CNSubdivisionCode),
     US(USSubdivisionCode),
@@ -136,7 +158,7 @@ pub enum SubdivisionCode {
 
 //
 impl ::core::str::FromStr for SubdivisionCode {
-    type Err = ::alloc::boxed::Box<str>;
+    type Err = crate::error::CountrySubdivisionCodeParseError;
 
     fn from_str(s: &str) -> Result<Self, Self::Err> {
         let country_code_s = s
@@ -144,10 +166,9 @@ impl ::core::str::FromStr for SubdivisionCode {
             .take_while(|x| x != &'-' && x != &'_')
             .collect::<::alloc::string::String>();
         let country_code = country_code_s.parse::<CountryCode>().map_err(|_| {
-            ::alloc::boxed::Box::<str>::from(alloc::format!(
-                "Invalid country_code [{}]",
-                country_code_s
-            ))
+            crate::error::CountrySubdivisionCodeParseError::CountryCodeInvalid(
+                country_code_s.as_str().into(),
+            )
         })?;
 
         match country_code {
@@ -163,10 +184,9 @@ impl ::core::str::FromStr for SubdivisionCode {
                 let subdivision_code_s = if s.len() > country_code_s.len() + 1 {
                     &s[country_code_s.len() + 1..]
                 } else {
-                    return Err(::alloc::boxed::Box::<str>::from(alloc::format!(
-                        "Invalid [{}]",
-                        s
-                    )));
+                    return Err(
+                        crate::error::CountrySubdivisionCodeParseError::SubdivisionCodeMissing,
+                    );
                 };
 
                 Ok(Self::Other(country, subdivision_code_s.into()))
@@ -187,10 +207,10 @@ impl ::core::fmt::Display for SubdivisionCode {
 }
 
 //
-impl_partial_eq_str! { str, SubdivisionCode }
-impl_partial_eq_str! { &'a str, SubdivisionCode }
-impl_partial_eq_str! { ::alloc::borrow::Cow<'a, str>, SubdivisionCode }
-impl_partial_eq_str! { ::alloc::string::String, SubdivisionCode }
+impl_macros::impl_partial_eq_str_for_display! { str, SubdivisionCode }
+impl_macros::impl_partial_eq_str_for_display! { &'a str, SubdivisionCode }
+impl_macros::impl_partial_eq_str_for_display! { ::alloc::borrow::Cow<'a, str>, SubdivisionCode }
+impl_macros::impl_partial_eq_str_for_display! { ::alloc::string::String, SubdivisionCode }
 
 //
 #[cfg(feature = "serde")]
