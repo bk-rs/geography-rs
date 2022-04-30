@@ -267,6 +267,7 @@ mod tests {
 
     #[test]
     fn test_country_code() {
+        // Wikipedia
         let mut rdr = Reader::from_reader(
             include_str!("../../tests/ISO_3166-1_alpha-2/Officially_assigned_code_elements.csv")
                 .as_bytes(),

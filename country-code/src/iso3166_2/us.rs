@@ -78,6 +78,7 @@ mod tests {
 
     #[test]
     fn test_country_subdivision_code() {
+        // Wikipedia
         let mut rdr = Reader::from_reader(include_str!("../../tests/ISO_3166-2/US.csv").as_bytes());
 
         let mut n = 0;
