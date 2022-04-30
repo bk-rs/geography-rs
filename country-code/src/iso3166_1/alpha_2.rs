@@ -283,12 +283,58 @@ mod tests {
 
         assert_eq!(CountryCode::VARS.len(), n);
 
-        //
+        // FromStr
+        assert_eq!(
+            "ZZ".parse::<CountryCode>().unwrap(),
+            CountryCode::Other("ZZ".into())
+        );
+        assert_eq!(
+            "x".parse::<CountryCode>().err().unwrap(),
+            crate::error::ParseError::Invalid("x".into())
+        );
+        #[cfg(feature = "std")]
+        {
+            std::println!("{}", "x".parse::<CountryCode>().err().unwrap());
+        }
+
+        // PartialEq
+        assert_eq!(CountryCode::US, CountryCode::US);
         assert_eq!(CountryCode::US, "US");
 
         match CountryCode::US {
             x if x == "US" => {}
             _ => panic!(),
+        }
+
+        #[cfg(feature = "std")]
+        {
+            // Hash
+            let mut h = std::collections::HashSet::new();
+            h.insert(CountryCode::US);
+            h.insert(CountryCode::Other("US".into()));
+            assert_eq!(h.len(), 1);
+        }
+
+        #[cfg(feature = "serde")]
+        {
+            #[derive(serde::Serialize, serde::Deserialize)]
+            struct Foo {
+                code: CountryCode,
+            }
+
+            assert_eq!(
+                serde_json::from_str::<Foo>(r#"{"code":"US"}"#)
+                    .unwrap()
+                    .code,
+                CountryCode::US
+            );
+            assert_eq!(
+                serde_json::to_string(&Foo {
+                    code: CountryCode::US
+                })
+                .unwrap(),
+                r#"{"code":"US"}"#
+            );
         }
     }
 }

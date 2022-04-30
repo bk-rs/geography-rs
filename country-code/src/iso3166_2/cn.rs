@@ -72,5 +72,67 @@ mod tests {
         assert_eq!(CountrySubdivisionCode::COUNTRY_CODE, CountryCode::CN);
 
         assert_eq!(CountrySubdivisionCode::VARS.len(), n);
+
+        // FromStr
+        assert_eq!(
+            "CN-ZZ".parse::<CountrySubdivisionCode>().unwrap(),
+            CountrySubdivisionCode::Other("ZZ".into())
+        );
+        assert_eq!(
+            "x-y".parse::<CountrySubdivisionCode>().err().unwrap(),
+            crate::error::CountrySubdivisionCodeParseError::CountryCodeInvalid("x".into())
+        );
+        assert_eq!(
+            "ZZ-y".parse::<CountrySubdivisionCode>().err().unwrap(),
+            crate::error::CountrySubdivisionCodeParseError::CountryCodeMismatch("ZZ".into())
+        );
+        assert_eq!(
+            "CN-".parse::<CountrySubdivisionCode>().err().unwrap(),
+            crate::error::CountrySubdivisionCodeParseError::SubdivisionCodeMissing
+        );
+        assert_eq!(
+            "CN-y".parse::<CountrySubdivisionCode>().err().unwrap(),
+            crate::error::CountrySubdivisionCodeParseError::SubdivisionCodeInvalid("y".into())
+        );
+
+        // PartialEq
+        assert_eq!(CountrySubdivisionCode::BJ, CountrySubdivisionCode::BJ);
+        assert_eq!(CountrySubdivisionCode::BJ, "CN-BJ");
+
+        match CountrySubdivisionCode::BJ {
+            x if x == "CN-BJ" => {}
+            _ => panic!(),
+        }
+
+        #[cfg(feature = "std")]
+        {
+            // Hash
+            let mut h = std::collections::HashSet::new();
+            h.insert(CountrySubdivisionCode::BJ);
+            h.insert(CountrySubdivisionCode::Other("BJ".into()));
+            assert_eq!(h.len(), 1);
+        }
+
+        #[cfg(feature = "serde")]
+        {
+            #[derive(serde::Serialize, serde::Deserialize)]
+            struct Foo {
+                code: CountrySubdivisionCode,
+            }
+
+            assert_eq!(
+                serde_json::from_str::<Foo>(r#"{"code":"CN-BJ"}"#)
+                    .unwrap()
+                    .code,
+                CountrySubdivisionCode::BJ
+            );
+            assert_eq!(
+                serde_json::to_string(&Foo {
+                    code: CountrySubdivisionCode::BJ
+                })
+                .unwrap(),
+                r#"{"code":"CN-BJ"}"#
+            );
+        }
     }
 }
