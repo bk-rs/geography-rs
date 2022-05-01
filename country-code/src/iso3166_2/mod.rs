@@ -153,7 +153,7 @@ use crate::iso3166_1::alpha_2::CountryCode;
 pub enum SubdivisionCode {
     CN(CNSubdivisionCode),
     US(USSubdivisionCode),
-    Other(CountryCode, ::alloc::boxed::Box<str>),
+    Other(CountryCode, Option<::alloc::boxed::Box<str>>),
 }
 
 //
@@ -182,14 +182,13 @@ impl ::core::str::FromStr for SubdivisionCode {
             }
             country => {
                 let subdivision_code_s = if s.len() > country_code_s.len() + 1 {
-                    &s[country_code_s.len() + 1..]
+                    let subdivision_code_s = &s[country_code_s.len() + 1..];
+                    Some(subdivision_code_s.into())
                 } else {
-                    return Err(
-                        crate::error::CountrySubdivisionCodeParseError::SubdivisionCodeMissing,
-                    );
+                    None
                 };
 
-                Ok(Self::Other(country, subdivision_code_s.into()))
+                Ok(Self::Other(country, subdivision_code_s))
             }
         }
     }
@@ -201,7 +200,8 @@ impl ::core::fmt::Display for SubdivisionCode {
         match self {
             Self::CN(subdivision) => ::core::write!(f, "{}", subdivision),
             Self::US(subdivision) => ::core::write!(f, "{}", subdivision),
-            Self::Other(country, s) => ::core::write!(f, "{}-{}", country, s),
+            Self::Other(country, Some(s)) => ::core::write!(f, "{}-{}", country, s),
+            Self::Other(country, None) => ::core::write!(f, "{}-", country),
         }
     }
 }
@@ -247,6 +247,7 @@ mod tests {
 
     #[test]
     fn test_subdivision_code() {
+        //
         assert_eq!(
             SubdivisionCode::US(us::CountrySubdivisionCode::NY).to_string(),
             "US-NY"
@@ -256,13 +257,24 @@ mod tests {
             SubdivisionCode::US(us::CountrySubdivisionCode::NY)
         );
 
+        //
         assert_eq!(
-            SubdivisionCode::Other(CountryCode::ZW, "BU".into()).to_string(),
+            SubdivisionCode::Other(CountryCode::ZW, Some("BU".into())).to_string(),
             "ZW-BU"
         );
         assert_eq!(
             "ZW-BU".parse::<SubdivisionCode>().unwrap(),
-            SubdivisionCode::Other(CountryCode::ZW, "BU".into())
+            SubdivisionCode::Other(CountryCode::ZW, Some("BU".into()))
+        );
+
+        //
+        assert_eq!(
+            SubdivisionCode::Other(CountryCode::AI, None).to_string(),
+            "AI-"
+        );
+        assert_eq!(
+            "AI-".parse::<SubdivisionCode>().unwrap(),
+            SubdivisionCode::Other(CountryCode::AI, None)
         );
     }
 }
