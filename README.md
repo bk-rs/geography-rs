@@ -9,3 +9,11 @@ cargo fmt -- --check
 cargo build-all-features
 cargo test-all-features -- --nocapture
 ```
+
+## Publish order
+
+continent-code
+
+country-code
+
+data_set/countrycode
