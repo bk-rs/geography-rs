@@ -19,11 +19,11 @@ all-features = true
 default = ["once_cell"]
 
 [dependencies]
-serde = { version = "1.0", default_features = false, features = ["std", "derive"] }
+serde = { version = "1", default_features = false, features = ["std", "derive"] }
 serde-field-with = { version = "0.1.2", default-features = false, features = ["std"] }
-csv = { version = "1.1", default_features = false }
+csv = { version = "1", default_features = false }
 
 country-code = { version = "0.2", default-features = false, features = ["std", "serde"], path = "../../country-code" }
-chrono-tz = { version = "0.6", default_features = false }
+chrono-tz = { version = "0.8", default_features = false }
 
-once_cell = { version = "1.10", default_features = false, features = ["std"], optional = true }
+once_cell = { version = "1", default_features = false, features = ["std"], optional = true }
