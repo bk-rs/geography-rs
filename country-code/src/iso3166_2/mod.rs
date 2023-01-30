@@ -198,10 +198,10 @@ impl ::core::str::FromStr for SubdivisionCode {
 impl ::core::fmt::Display for SubdivisionCode {
     fn fmt(&self, f: &mut ::core::fmt::Formatter<'_>) -> ::core::fmt::Result {
         match self {
-            Self::CN(subdivision) => ::core::write!(f, "{}", subdivision),
-            Self::US(subdivision) => ::core::write!(f, "{}", subdivision),
-            Self::Other(country, Some(s)) => ::core::write!(f, "{}-{}", country, s),
-            Self::Other(country, None) => ::core::write!(f, "{}-", country),
+            Self::CN(subdivision) => ::core::write!(f, "{subdivision}"),
+            Self::US(subdivision) => ::core::write!(f, "{subdivision}"),
+            Self::Other(country, Some(s)) => ::core::write!(f, "{country}-{s}"),
+            Self::Other(country, None) => ::core::write!(f, "{country}-"),
         }
     }
 }
