@@ -3,6 +3,6 @@
 continent_code::continent_code! {
     #[derive(Debug, Clone)]
     pub enum MyContinentCode {
-        AS,
+        AS => "Asia",
     }
 }

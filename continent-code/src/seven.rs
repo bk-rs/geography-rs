@@ -1,13 +1,13 @@
 continent_code! {
     #[derive(Debug, Clone)]
     pub enum ContinentCode {
-        AS,
-        AF,
-        NA,
-        SA,
-        AN,
-        EU,
-        OC | AU,
+        AS => "Asia",
+        AF => "Africa",
+        NA => "North America",
+        SA => "South America",
+        AN => "Antarctica",
+        EU => "Europe",
+        OC | AU => "Oceania",
     }
 }
 
@@ -30,24 +30,17 @@ mod tests {
         let mut n = 0;
         for record in rdr.records().skip(2) {
             let record = record.unwrap();
-            let name = &record[0];
-            let code = match name {
-                "Asia" => "AS",
-                "Africa" => "AF",
-                "North America" => "NA",
-                "South America" => "SA",
-                "Antarctica" => "AN",
-                "Europe" => "EU",
-                "Oceania" => "OC",
-                s => panic!("{}", s),
-            };
-            assert_eq!(code.parse::<ContinentCode>().unwrap().to_string(), code);
+            let en_name = &record[0];
+            assert_eq!(en_name.parse::<ContinentCode>().unwrap().en_name(), en_name);
             n += 1;
         }
 
         assert_eq!("AU".parse::<ContinentCode>().unwrap().to_string(), "OC");
 
         assert_eq!(ContinentCode::VARS.len(), n);
+
+        assert_eq!(ContinentCode::from_en_name("Asia"), Some(ContinentCode::AS));
+        assert_eq!(ContinentCode::AS.en_name(), "Asia");
 
         // PartialEq
         assert_eq!(ContinentCode::AS, ContinentCode::AS);

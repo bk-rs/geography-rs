@@ -10,7 +10,7 @@ macro_rules! continent_code {
         $pub:vis enum $name:ident {
             $(
                 $( #[$variant_meta:meta] )*
-                $variant:ident $( | $alias:ident )*,
+                $variant:ident $( | $alias:ident )* => $variant_en_name:literal,
             )+
         }
     ) => {
@@ -29,6 +29,23 @@ macro_rules! continent_code {
                     $name::$variant,
                 )+
             ];
+
+            pub fn en_name(&self) -> &'static str {
+                match self {
+                    $(
+                        Self::$variant => $variant_en_name,
+                    )+
+                }
+            }
+
+            pub fn from_en_name(en_name: &str) -> Option<Self> {
+                match en_name {
+                    $(
+                        $variant_en_name => Some(Self::$variant),
+                    )+
+                    _ => None,
+                }
+            }
         }
 
         //
@@ -38,7 +55,7 @@ macro_rules! continent_code {
             fn from_str(s: &str) -> Result<Self, Self::Err> {
                 match s {
                     $(
-                        ::core::stringify!($variant) $( | ::core::stringify!($alias) )* => Ok(Self::$variant),
+                        ::core::stringify!($variant) $( | ::core::stringify!($alias) )* | $variant_en_name => Ok(Self::$variant),
                     )+
                     s => Err($crate::error::ParseError::Invalid(s.into()))
                 }
