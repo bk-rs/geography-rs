@@ -23,7 +23,7 @@ serde = { version = "1", default-features = false, features = [
     "std",
     "derive",
 ] }
-serde-field-with = { version = "0.1.2", default-features = false, features = [
+serde-field-with = { version = "0.2", default-features = false, features = [
     "std",
 ] }
 csv = { version = "1", default-features = false }
@@ -32,7 +32,7 @@ country-code = { version = "0.3", default-features = false, features = [
     "std",
     "serde",
 ], path = "../../country-code" }
-chrono-tz = { version = "0.8", default-features = false }
+chrono-tz = { version = "0.10", default-features = false }
 
 once_cell = { version = "1", default-features = false, features = [
     "std",
