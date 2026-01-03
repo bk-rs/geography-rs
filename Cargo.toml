@@ -5,3 +5,5 @@ members = [
     # 
     "data_set/*"
 ]
+resolver = "2"
+
