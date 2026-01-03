@@ -2,7 +2,7 @@
 name = "countrycode"
 version = "0.2.0"
 authors = ["vkill <vkill.net@gmail.com>"]
-edition = "2021"
+edition = "2024"
 description = "https://countrycode.org/ ALL COUNTRY CODES"
 license = "Apache-2.0 OR MIT"
 repository = "https://github.com/bk-rs/geography-rs"
@@ -19,11 +19,21 @@ all-features = true
 default = ["once_cell"]
 
 [dependencies]
-serde = { version = "1", default_features = false, features = ["std", "derive"] }
-serde-field-with = { version = "0.1.2", default-features = false, features = ["std"] }
-csv = { version = "1", default_features = false }
+serde = { version = "1", default-features = false, features = [
+    "std",
+    "derive",
+] }
+serde-field-with = { version = "0.1.2", default-features = false, features = [
+    "std",
+] }
+csv = { version = "1", default-features = false }
 
-country-code = { version = "0.3", default-features = false, features = ["std", "serde"], path = "../../country-code" }
-chrono-tz = { version = "0.8", default_features = false }
+country-code = { version = "0.3", default-features = false, features = [
+    "std",
+    "serde",
+], path = "../../country-code" }
+chrono-tz = { version = "0.8", default-features = false }
 
-once_cell = { version = "1", default_features = false, features = ["std"], optional = true }
+once_cell = { version = "1", default-features = false, features = [
+    "std",
+], optional = true }

@@ -2,7 +2,7 @@
 name = "country-code"
 version = "0.3.0"
 authors = ["vkill <vkill.net@gmail.com>"]
-edition = "2021"
+edition = "2024"
 description = "Country Code"
 license = "Apache-2.0 OR MIT"
 repository = "https://github.com/bk-rs/geography-rs"
@@ -20,8 +20,12 @@ default = ["std"]
 std = []
 
 [dependencies]
-impl-macros = { version = "0.1.1", default-features = false, features = ["alloc"] }
-serde = { version = "1", default-features = false, features = ["alloc"], optional = true }
+impl-macros = { version = "0.1.1", default-features = false, features = [
+    "alloc",
+] }
+serde = { version = "1", default-features = false, features = [
+    "alloc",
+], optional = true }
 
 [dev-dependencies]
 csv = { version = "1" }
