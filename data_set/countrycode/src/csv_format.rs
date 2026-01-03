@@ -1,5 +1,5 @@
 use core::ops::Deref;
-use std::io::Read;
+use std::{io::Read, sync::LazyLock};
 
 use csv::{Error as CsvError, Reader, StringRecord};
 
@@ -31,16 +31,14 @@ pub const CSV_HEADER: &[&str] = &[
 ];
 
 //
-#[cfg(feature = "once_cell")]
-pub static RECORDS: once_cell::sync::Lazy<Records> = once_cell::sync::Lazy::new(|| {
+pub static RECORDS: LazyLock<Records> = LazyLock::new(|| {
     let csv = include_str!("../data/countrycode.csv");
     Records::from_csv(csv.as_bytes()).unwrap()
 });
 
-#[cfg(feature = "once_cell")]
-pub static RECORDS_ISO2_MAP: once_cell::sync::Lazy<
+pub static RECORDS_ISO2_MAP: LazyLock<
     std::collections::HashMap<country_code::CountryCode, Record>,
-> = once_cell::sync::Lazy::new(|| {
+> = LazyLock::new(|| {
     RECORDS
         .iter()
         .cloned()

@@ -16,7 +16,7 @@ readme = "README.md"
 all-features = true
 
 [features]
-default = ["once_cell"]
+default = []
 
 [dependencies]
 serde = { version = "1", default-features = false, features = [
@@ -33,7 +33,3 @@ country-code = { version = "0.3", default-features = false, features = [
     "serde",
 ], path = "../../country-code" }
 chrono-tz = { version = "0.10", default-features = false }
-
-once_cell = { version = "1", default-features = false, features = [
-    "std",
-], optional = true }

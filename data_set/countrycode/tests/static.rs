@@ -1,5 +1,3 @@
-#![cfg(feature = "once_cell")]
-
 use country_code::CountryCode;
 use countrycode::RECORDS_ISO2_MAP;
 
