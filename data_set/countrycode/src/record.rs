@@ -1,5 +1,5 @@
 use chrono_tz::Tz;
-use country_code::{iso3166_1::alpha_3::CountryCode as CountryCodeIso3, CountryCode};
+use country_code::{CountryCode, iso3166_1::alpha_3::CountryCode as CountryCodeIso3};
 use serde::Deserialize;
 
 //
