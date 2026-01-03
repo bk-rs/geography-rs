@@ -94,10 +94,10 @@ macro_rules! country_subdivision_code {
         }
 
         //
-        impl_macros::impl_partial_eq_str_for_display! { str, $name }
-        impl_macros::impl_partial_eq_str_for_display! { &'a str, $name }
-        impl_macros::impl_partial_eq_str_for_display! { $crate::alloc::borrow::Cow<'a, str>, $name }
-        impl_macros::impl_partial_eq_str_for_display! { $crate::alloc::string::String, $name }
+        $crate::impl_partial_eq_str_for_display! { str, $name }
+        $crate::impl_partial_eq_str_for_display! { &'a str, $name }
+        $crate::impl_partial_eq_str_for_display! { $crate::alloc::borrow::Cow<'a, str>, $name }
+        $crate::impl_partial_eq_str_for_display! { $crate::alloc::string::String, $name }
 
         //
         #[cfg(feature = "std")]
@@ -207,10 +207,10 @@ impl ::core::fmt::Display for SubdivisionCode {
 }
 
 //
-impl_macros::impl_partial_eq_str_for_display! { str, SubdivisionCode }
-impl_macros::impl_partial_eq_str_for_display! { &'a str, SubdivisionCode }
-impl_macros::impl_partial_eq_str_for_display! { ::alloc::borrow::Cow<'a, str>, SubdivisionCode }
-impl_macros::impl_partial_eq_str_for_display! { ::alloc::string::String, SubdivisionCode }
+crate::impl_partial_eq_str_for_display! { str, SubdivisionCode }
+crate::impl_partial_eq_str_for_display! { &'a str, SubdivisionCode }
+crate::impl_partial_eq_str_for_display! { ::alloc::borrow::Cow<'a, str>, SubdivisionCode }
+crate::impl_partial_eq_str_for_display! { ::alloc::string::String, SubdivisionCode }
 
 //
 #[cfg(feature = "serde")]

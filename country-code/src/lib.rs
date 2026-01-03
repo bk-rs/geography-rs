@@ -78,10 +78,10 @@ macro_rules! country_code {
         }
 
         //
-        impl_macros::impl_partial_eq_str_for_display! { str, $name }
-        impl_macros::impl_partial_eq_str_for_display! { &'a str, $name }
-        impl_macros::impl_partial_eq_str_for_display! { $crate::alloc::borrow::Cow<'a, str>, $name }
-        impl_macros::impl_partial_eq_str_for_display! { $crate::alloc::string::String, $name }
+        $crate::impl_partial_eq_str_for_display! { str, $name }
+        $crate::impl_partial_eq_str_for_display! { &'a str, $name }
+        $crate::impl_partial_eq_str_for_display! { $crate::alloc::borrow::Cow<'a, str>, $name }
+        $crate::impl_partial_eq_str_for_display! { $crate::alloc::string::String, $name }
 
         //
         #[cfg(feature = "std")]
@@ -129,3 +129,16 @@ pub mod iso3166_2;
 
 pub use iso3166_1::alpha_2::CountryCode;
 pub use iso3166_2::SubdivisionCode;
+
+//
+#[macro_export]
+macro_rules! impl_partial_eq_str_for_display {
+    ($str:ty, $display:ty) => {
+        #[allow(unused_lifetimes)]
+        impl<'a> ::core::cmp::PartialEq<$str> for $display {
+            fn eq(&self, other: &$str) -> bool {
+                ::core::cmp::PartialEq::eq(&$crate::alloc::format!("{}", self)[..], &other[..])
+            }
+        }
+    };
+}

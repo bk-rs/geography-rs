@@ -20,9 +20,6 @@ default = ["std"]
 std = []
 
 [dependencies]
-impl-macros = { version = "0.1.1", default-features = false, features = [
-    "alloc",
-] }
 serde = { version = "1", default-features = false, features = [
     "alloc",
 ], optional = true }
