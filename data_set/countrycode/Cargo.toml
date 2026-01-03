@@ -1,6 +1,6 @@
 [package]
 name = "countrycode"
-version = "0.2.0"
+version = "0.3.0"
 authors = ["vkill <vkill.net@gmail.com>"]
 edition = "2024"
 description = "https://countrycode.org/ ALL COUNTRY CODES"
@@ -28,7 +28,7 @@ serde-field-with = { version = "0.2", default-features = false, features = [
 ] }
 csv = { version = "1", default-features = false }
 
-country-code = { version = "0.3", default-features = false, features = [
+country-code = { version = "0.4", default-features = false, features = [
     "std",
     "serde",
 ], path = "../../country-code" }
