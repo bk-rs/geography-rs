@@ -94,4 +94,4 @@ impl core::fmt::Display for RecordsFromCsvError {
     }
 }
 
-impl std::error::Error for RecordsFromCsvError {}
+impl core::error::Error for RecordsFromCsvError {}

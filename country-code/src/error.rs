@@ -10,8 +10,7 @@ impl core::fmt::Display for ParseError {
     }
 }
 
-#[cfg(feature = "std")]
-impl std::error::Error for ParseError {}
+impl core::error::Error for ParseError {}
 
 //
 #[derive(Debug, Clone, PartialEq, Eq)]
@@ -28,5 +27,4 @@ impl core::fmt::Display for CountrySubdivisionCodeParseError {
     }
 }
 
-#[cfg(feature = "std")]
-impl std::error::Error for CountrySubdivisionCodeParseError {}
+impl core::error::Error for CountrySubdivisionCodeParseError {}
